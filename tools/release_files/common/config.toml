@@ -1,0 +1,96 @@
+# Wheel of the Year wallpaper - settings  (version @VERSION@)
+#
+# Change a value, save the file, then run "Update Wallpaper Now" to see it.
+# Delete a line to go back to its default. Keep the quotation marks where they are.
+# If something here is wrong, the wallpaper still works: it uses the default instead and
+# writes a note in build/log.txt saying what it didn't understand.
+
+
+# ----- the panel in the corner -------------------------------------------------------------
+
+[panel]
+month_names = "norse"   # month names on the wheel's outer ring and in the panel:
+                        #   "norse"  -> Haustmánuður
+                        #   "modern" -> September
+                        #   "both"   -> Haustmánuður-September on the ring,
+                        #               Haustmánuður (September) in the panel
+corner = "auto"         # "auto" (beside the wheel), "top-left", "top-right",
+                        # "bottom-left" or "bottom-right"
+date_format = "day-first"   # "day-first" (Sunday · 20 September 2026)
+                            # "month-first" (Sunday · September 20, 2026)
+clock = "12h"           # "12h" (3:42 PM) or "24h" (15:42)
+
+show_zodiac = true          # show the zodiac sign next to the Sabbat
+show_illumination = true    # show "68% illuminated"
+show_countdown = false      # show "Mabon in 3 days"
+show_moon_times = false     # show "Moonrise 3:42 PM · Moonset 12:11 AM"
+show_sun_times = false      # show "Sunrise 6:15 AM · Sunset 6:27 PM"
+
+
+# ----- your own names for the Sabbats (panel only) -------------------------------------------
+# The wheel itself keeps the names painted on it; this only changes the panel.
+# Add a line for any you want renamed, for example:
+#   Lughnasadh = "Lammas"
+#   Litha = "Midsummer"
+#   Yule = "Midwinter"
+
+[sabbat_names]
+
+
+# ----- your own dates ------------------------------------------------------------------------
+# Days that matter to you. On that day the panel adds a line with a ◆ in front.
+#   "10-31"      = every year on 31 October
+#   "2026-12-24" = only that one day
+# For example:
+#   "10-31" = "Ancestor night"
+#   "06-14" = "Our anniversary"
+
+[dates]
+
+
+# ----- where you are -------------------------------------------------------------------------
+# Only needed for moonrise/moonset and sunrise/sunset times, and to tell north from south of
+# the equator. Leave blank and it is estimated from your computer's time zone, which is usually
+# close enough. Nothing is ever sent anywhere - the times are worked out on your own computer.
+# South and west are negative, e.g. Sydney: latitude = -33.87, longitude = 151.21
+
+[location]
+latitude = ""
+longitude = ""
+
+
+# ----- how it looks -----------------------------------------------------------------------------
+
+[look]
+hemisphere = "auto"     # "auto" (from your latitude), "north" or "south".
+                        # South of the equator the seasons are six months apart, so the Sabbat
+                        # names swap to the opposite side of the wheel.
+wheel_side = "auto"     # "auto" (the emptier side of the photo), "left" or "right".
+                        # A single photo can override this: end its file name with
+                        # _wheel-left or _wheel-right
+wheel_height = 0.78     # size of the wheel, as a fraction of the screen height
+
+norse_ring = "#6a2c2c"  # colour of the Old Norse month ring (oxblood)
+almanac_ring = "#34466a" # colour of the moon-name ring (night-sky blue)
+zodiac_ring = ""        # colour of the zodiac ring - blank leaves it as painted (purple)
+sabbat_ring = ""        # colour of the Sabbat ring - blank leaves it as painted (near-black)
+highlight_strength = 0.4 # how much lighter today's segments are (0 = none, 1 = white)
+
+dim = 0.55              # how bright the parts that aren't current are (1 = not dimmed)
+text_dim = 0.55         # how visible the labels that aren't current are (1 = fully)
+wedge_dim = 0.6         # the solstice/equinox wedges on ordinary days
+moon_dim = 0.4          # brightness of the other moons
+moon_lift = 1.35        # brightness of today's moon
+moon_scale = 1.3        # size of today's moon
+photo_brightness = 0.9  # background photo brightness
+wheel_side_shade = 0.8  # how much the background darkens behind the wheel (0 = not at all)
+
+
+# ----- screen and output -------------------------------------------------------------------------
+
+[screen]
+width = "auto"          # "auto" detects your screen; or set numbers, e.g. 1920
+height = "auto"         #                                                 1080
+
+[output]
+keep = 3                # how many days' pictures to keep in build/wallpaper

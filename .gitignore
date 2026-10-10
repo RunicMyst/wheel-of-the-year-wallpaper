@@ -1,0 +1,49 @@
+# Generated output
+build/
+
+# Personal pictures: keep the folders, not the images
+backgrounds/**/*.jpg
+backgrounds/**/*.jpeg
+backgrounds/**/*.png
+backgrounds/**/*.webp
+backgrounds/**/*.JPG
+backgrounds/**/*.JPEG
+backgrounds/**/*.PNG
+backgrounds/**/*.WEBP
+wedges/**/*.jpg
+wedges/**/*.jpeg
+wedges/**/*.png
+wedges/**/*.webp
+wedges/**/*.JPG
+wedges/**/*.JPEG
+wedges/**/*.PNG
+wedges/**/*.WEBP
+center/**/*.jpg
+center/**/*.jpeg
+center/**/*.png
+center/**/*.webp
+center/**/*.JPG
+center/**/*.JPEG
+center/**/*.PNG
+center/**/*.WEBP
+
+# Built release folders (made by tools/make_release.py)
+releases/
+sabbat-ring/**/*.jpg
+sabbat-ring/**/*.jpeg
+sabbat-ring/**/*.png
+sabbat-ring/**/*.webp
+sabbat-ring/**/*.JPG
+sabbat-ring/**/*.JPEG
+sabbat-ring/**/*.PNG
+sabbat-ring/**/*.WEBP
+
+# Workshop-only markers (they only make sense next to a release folder)
+⚠*.txt
+
+# Python cache
+__pycache__/
+*.pyc
+
+# the workshop copy's own settings (the template is tools/release_files/common/config.toml)
+/config.toml

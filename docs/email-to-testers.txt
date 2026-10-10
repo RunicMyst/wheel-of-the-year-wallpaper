@@ -1,0 +1,65 @@
+Paste-ready note to send with the Google Drive link (Windows testers, version 0.9.1).
+Edit the greeting and the link, delete this first line.
+
+--------------------------------------------------------------------------------
+
+Here's the Wheel of the Year wallpaper I've been building. It's a desktop background
+that redraws itself every day to show where we are in the year: the current Sabbat,
+the zodiac sign, the Old Norse and modern month, tonight's moon phase, and the
+solstices and equinoxes on the day they happen.
+
+Download:  <paste your Google Drive link here>
+
+It's free, there's nothing to sign up for, and it doesn't need the internet once it's
+on your computer. I'd love to know what does and doesn't work for you - that's really
+why I'm sending it.
+
+
+TO INSTALL (Windows 10 or 11, about two minutes)
+
+1. Download the .zip file and save it somewhere you'll keep it - your Pictures folder
+   or your desktop is ideal. Avoid putting it inside OneDrive: it makes a new picture
+   every day, and OneDrive would upload every one of them.
+
+2. Right-click the .zip and choose "Extract All...". Don't open anything from inside
+   the zip window itself - unzip it first.
+
+3. Open the unzipped folder and double-click  Install.cmd
+
+   Windows will probably show a blue box saying "Windows protected your PC".
+   Click "More info", then "Run anyway". That warning appears for anything that
+   isn't from a big company; there's nothing unusual about this file.
+
+4. A black window opens for a few seconds, your wallpaper changes, and you press a
+   key to close it. That's it - it updates itself every night from then on.
+
+
+A FEW THINGS TO KNOW
+
+- Your background starts plain black. That's normal. The wheel is there, but the
+  photo behind it comes from folders you fill yourself - drop pictures into
+  backgrounds\Samhain, backgrounds\Yule and so on, one folder per Sabbat. Every
+  picture you put in gets used, a different one each day.
+
+- A gear icon appears on your desktop called "Wheel of the Year Settings". That opens
+  the settings in Notepad. You can change the month names, the colours, add your own
+  dates (birthdays, anniversaries), show moonrise and moonset times, and more. Every
+  setting has an explanation next to it, and nothing you type can break it.
+
+- There's a README.txt in the folder with the full details.
+
+- To remove it: double-click Uninstall.cmd. It stops there and then. Your wallpaper
+  stays until you pick a different one in Settings > Personalization > Background.
+
+
+IF SOMETHING GOES WRONG
+
+Send me two things and it can usually be fixed quickly:
+
+  1. The file  build\log.txt  from inside the folder (it records every run).
+  2. What you expected to happen, and what actually happened.
+
+Don't worry about describing it in technical terms - "nothing happened when I
+double-clicked Install" is exactly the kind of report that helps.
+
+Thanks for trying it.
