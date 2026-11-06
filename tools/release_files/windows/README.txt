@@ -95,10 +95,22 @@ carries on, and writes a note in build\log.txt saying what it didn't understand.
                      "norse"  ->  Haustmánuður
                      "modern" ->  September
                      "both"   ->  Haustmánuður (September)
+  accent           The panel's colour. One of:
+                     a name:   "gold", "oxblood", "iron", "bone", "forest", "night"
+                     your own: "#6a2c2c"
+                     "season"  a different colour for each Sabbat
+                     "rotate"  a different one of the names each day
+  [accents]        Your own colour per Sabbat, used when accent = "season"
   corner           Which corner the panel sits in
   date_format      "day-first" (20 September 2026) or "month-first" (September 20, 2026)
   clock            "12h" (3:42 PM) or "24h" (15:42)
   show_countdown   Adds "Mabon in 3 days"
+  countdown_style  What that line says: "days", "date" (Mabon . 22 September), or "both"
+  festival_only    false (default) keeps a Sabbat lit for its whole season. true lights it
+                   only on the days it is actually kept; in between, the symbol slot drawn
+                   in that gap lights instead, or the ring rests where none is drawn.
+  [festival_days]  How long each Sabbat is kept when festival_only = true. Yule defaults to
+                   12 days (the twelve nights); every other Sabbat defaults to 1.
   show_moon_times  Adds "Moonrise 3:42 PM · Moonset 12:11 AM"
   show_sun_times   Adds sunrise and sunset
   show_zodiac, show_illumination

@@ -86,8 +86,13 @@ appears in `build/log.txt`.
 | Setting | What it does |
 |---|---|
 | `month_names` | Month names on the wheel's outer ring and in the panel: `"norse"` (Haustmánuður), `"modern"` (September) or `"both"` |
+| `accent` | The panel's colour: a name (`"gold"`, `"oxblood"`, `"iron"`, `"bone"`, `"forest"`, `"night"`), your own `"#rrggbb"`, `"season"` (a colour per Sabbat) or `"rotate"` (a different one daily) |
+| `[accents]` | Your own colour for each Sabbat when `accent = "season"` |
 | `corner`, `date_format`, `clock` | Where the panel sits, day-first or month-first dates, 12- or 24-hour times |
 | `show_countdown` | Adds "Mabon in 3 days" |
+| `countdown_style` | What that line says: `"days"`, `"date"` (Mabon · 22 September) or `"both"` |
+| `festival_only` | `false` (default) keeps a Sabbat lit for its whole season. `true` lights it only on the days it's actually kept — in between, the symbol slot drawn in that gap lights instead, or the ring rests where none is drawn |
+| `[festival_days]` | How long each Sabbat is kept when `festival_only = true`. Yule defaults to 12 days, the rest to 1 |
 | `show_moon_times`, `show_sun_times` | Adds moonrise/moonset and sunrise/sunset times |
 | `show_zodiac`, `show_illumination` | Hide those lines if you don't want them |
 | `[sabbat_names]` | Your own names in the panel, e.g. `Lughnasadh = "Lammas"` |

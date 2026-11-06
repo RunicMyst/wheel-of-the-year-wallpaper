@@ -26,10 +26,74 @@ def _font(name, size):
     return ImageFont.truetype(str(p), size) if p.exists() else ImageFont.load_default(size)
 
 
+ACCENTS = {   # named colours for [panel] accent - any "#rrggbb" works too
+    "oxblood": "#964646", "gold": "#c8a05a", "iron": "#828894",
+    "bone": "#bebab0", "forest": "#4a7a55", "night": "#26407f",
+}
+
+
+# A colour for each Sabbat, used when accent = "season". Any of these can be overridden in
+# config.toml under [accents].
+SEASON_ACCENTS = {
+    "Samhain": "oxblood", "Yule": "night", "Imbolc": "bone", "Ostara": "forest",
+    "Beltane": "#b5503c", "Litha": "gold", "Lughnasadh": "#c08a3e", "Mabon": "#8c4a2f",
+}
+
+
+def resolve_accent(cfg, st):
+    """Turn the accent setting into an actual colour.
+
+    "season" follows the Sabbat, "rotate" changes daily through the named colours, and anything
+    else is used as given.
+    """
+    setting = str(cfg["panel"]["accent"]).strip().lower()
+    chosen = dict(cfg.get("accents", {}))
+    if setting == "season":
+        table = {k.lower(): v for k, v in chosen.items()}
+        return table.get(st.sabbat.lower(), SEASON_ACCENTS[st.sabbat])
+    if setting == "rotate":
+        names = list(ACCENTS)
+        return names[st.day.toordinal() % len(names)]
+    return setting
+
+
+def accent_colours(setting):
+    """Every colour the panel uses, worked out from one accent colour.
+
+    Text is lightened towards white but pulled back towards the accent, so the colour survives
+    at brighter levels instead of fading to cream. A floor keeps every line readable even when
+    someone picks a very dark accent.
+    """
+    name = str(setting).strip().lower()
+    value = ACCENTS.get(name, name)
+    try:
+        base = tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
+    except (ValueError, IndexError):
+        base = tuple(int(ACCENTS["oxblood"][i:i + 2], 16) for i in (1, 3, 5))
+
+    def tone(f):
+        pale = (c + (255 - c) * f for c in base)
+        mixed = [p * 0.55 + b * 0.45 + 30 * f for p, b in zip(pale, base)]
+        lum = 0.2126 * mixed[0] + 0.7152 * mixed[1] + 0.0722 * mixed[2]
+        floor = 95 + 125 * f
+        if lum < floor:
+            mixed = [c + (255 - c) * (floor - lum) / (255 - lum) for c in mixed]
+        return tuple(min(255, int(c)) for c in mixed)
+
+    return {"border": base + (170,), "rule": base + (100,),
+            "date": tone(0.52), "phase": tone(0.74), "pct": tone(0.40), "times": tone(0.34),
+            "main": tone(0.66), "sub": tone(0.46), "event": tone(0.30)}
+
+
 def _clock(t, style="12h"):
     if style == "24h":
         return f"{t.hour:02d}:{t.minute:02d}"
     return f"{t.hour % 12 or 12}:{t.minute:02d} {'AM' if t.hour < 12 else 'PM'}"  # (no %-I on Windows)
+
+
+def _date_short(d, style):
+    """Just the day and month, for the countdown line: "21 December" / "December 21"."""
+    return f"{d.day} {d:%B}" if style == "day-first" else f"{d:%B} {d.day}"
 
 
 def _date(d, style):
@@ -111,8 +175,13 @@ def panel_lines(st, cfg, place):
     lines.append((month_line(st, p["month_names"]), "sub"))
     if p["show_countdown"]:
         days = st.days_to_next
-        when = "today" if days == 0 else "tomorrow" if days == 1 else f"in {days} days"
-        lines.append((f"{sabbat_name(cfg, st.next_sabbat)} {when}", "sub"))
+        when = "tomorrow" if days == 1 else f"in {days} days"
+        nxt, on = sabbat_name(cfg, st.next_sabbat), _date_short(st.next_sabbat_start, p["date_format"])
+        lines.append(({"date": f"{nxt}  ·  {on}", "both": f"{nxt} {when}  ·  {on}"}
+                      .get(p["countdown_style"], f"{nxt} {when}"), "sub"))
+    # The day itself, which the countdown above has already moved past.
+    if st.festival:
+        lines.append((f"{sabbat_name(cfg, st.festival)} today", "event"))
     if st.season_event:
         lines.append((f"{st.season_event}  ·  {_clock(st.season_event_time, p['clock'])}", "event"))
     for text in config.observances(cfg, st.day):
@@ -132,9 +201,7 @@ def info_panel(st, scale, cfg, place):
     s = lambda v: int(round(v * scale))
     sizes = {"date": 17, "phase": 21, "pct": 17, "times": 15, "main": 17, "sub": 17, "event": 17}
     bold = {"phase"}
-    colours = {"date": (200, 190, 175), "phase": (245, 230, 200), "pct": (220, 190, 120),
-               "times": (185, 190, 200), "main": (230, 220, 200), "sub": (185, 175, 160),
-               "event": (255, 176, 112)}
+    colours = accent_colours(resolve_accent(cfg, st))
     fonts = {k: _font("DejaVuSerif-Bold.ttf" if k in bold else "DejaVuSerif.ttf", s(v)) for k, v in sizes.items()}
     lines = panel_lines(st, cfg, place)
     pad, icon, gap_after_icon = s(16), s(44), s(10)
@@ -154,12 +221,12 @@ def info_panel(st, scale, cfg, place):
     width = int(max(s(330), max(x + measure.textlength(t, font=fonts[k]) for x, _, t, k in rows) + pad))
     p = Image.new("RGBA", (width, height), (0, 0, 0, 0)); d = ImageDraw.Draw(p)
     d.rounded_rectangle([0, 0, width - 1, height - 1], s(12), fill=(10, 8, 14, 185),
-                        outline=(200, 160, 90, 160), width=max(1, s(1)))
+                        outline=colours["border"], width=max(1, s(1)))
     icon_file = {"NM": "NewMoon.png", "WX": "WaxingMoon.png", "FM": "FullMoon.png", "WN": "WanningMoon.png"}[st.moon_icon]
     p.alpha_composite(Image.open(FONTS.parent / "moons" / icon_file).convert("RGBA").resize((icon, icon), Image.LANCZOS),
                       (pad, icon_top))
     if rule_y:
-        d.line([(pad, rule_y), (width - pad, rule_y)], fill=(200, 160, 90, 90), width=max(1, s(1)))
+        d.line([(pad, rule_y), (width - pad, rule_y)], fill=colours["rule"], width=max(1, s(1)))
     for x, yy, text, k in rows:
         d.text((x, yy), text, font=fonts[k], fill=colours[k])
     return p

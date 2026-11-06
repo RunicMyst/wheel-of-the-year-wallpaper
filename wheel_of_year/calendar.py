@@ -26,6 +26,22 @@ SEASON_WEDGE = {"north": {"march": "Spring Equinox", "june": "Summer Solstice",
                           "september": "Autumn Equinox", "december": "Winter Solstice"},
                 "south": {"march": "Autumn Equinox", "june": "Winter Solstice",
                           "september": "Spring Equinox", "december": "Summer Solstice"}}
+# How many days each Sabbat is actually kept, counting from its own date. Settings override any.
+#   Samhain 3 - the Gaulish calendar's "three nights of Samonios", and the three-day assembly
+#               at Tara in the medieval Irish sources. Sunset 31 Oct to sunset 2 Nov.
+#   Yule 3    - jol as a three-night midwinter feast (Jackson Crawford). The familiar twelve
+#               nights are a modern reconstruction: set Yule = 12 if you keep it that way.
+#   Litha 3   - Midsummer in Scandinavia is kept over about three days around the Eve.
+#   The rest are single days: Imbolc and Beltane begin at sunset on the eve and run one day,
+#   Lughnasadh is 1 August, and Ostara and Mabon are the equinoxes themselves.
+FESTIVAL_DAYS = {"Samhain": 3, "Yule": 3, "Imbolc": 1, "Ostara": 1,
+                 "Beltane": 1, "Litha": 3, "Lughnasadh": 1, "Mabon": 1}
+
+# The four unnamed Sabbat-ring slots, each drawn in the gap between two Sabbats. The other four
+# pairs sit side by side with nothing between them, so in those stretches the ring simply rests.
+BETWEEN = {("Samhain", "Yule"): "Samhain-Yule", ("Yule", "Imbolc"): "Yule-Imbolc",
+           ("Ostara", "Beltane"): "Ostara-Beltane", ("Litha", "Lughnasadh"): "Litha-Lughnasadh"}
+
 OPPOSITE = {"Samhain": "Beltane", "Beltane": "Samhain", "Yule": "Litha", "Litha": "Yule",
             "Imbolc": "Lughnasadh", "Lughnasadh": "Imbolc", "Ostara": "Mabon", "Mabon": "Ostara",
             "Spring Equinox": "Autumn Equinox", "Autumn Equinox": "Spring Equinox",
@@ -50,6 +66,8 @@ class DayState:
     moon_icon: str          # NM / WX / FM / WN
     season_event: str | None  # e.g. "Autumn Equinox" only on the actual day
     season_event_time: datetime | None
+    festival: str | None = None    # the Sabbat actually being kept today, else None
+    gap: tuple | None = None       # (Sabbat just gone, Sabbat coming) while none is being kept
 
     @property
     def days_to_next(self):
@@ -66,10 +84,11 @@ def sabbat_dates(year, hemisphere="north"):
     return out
 
 
-def state_for(day, moon_at=None, hemisphere="north"):
+def state_for(day, moon_at=None, hemisphere="north", festival_days=None):
     """Everything the wallpaper shows for local date `day`.
 
     The moon phase is taken at `moon_at` (a local datetime; defaults to noon of `day`).
+    `festival_days` overrides how long individual Sabbats are kept (see FESTIVAL_DAYS).
     """
     events = sorted((d, n) for y in (day.year - 1, day.year, day.year + 1)
                     for n, d in sabbat_dates(y, hemisphere).items())
@@ -89,6 +108,13 @@ def state_for(day, moon_at=None, hemisphere="north"):
         if local_date(t) == day:
             season_event, season_time = label, t.astimezone()
 
+    # Which Sabbat is actually being kept today, as against whose season we are in. The season
+    # still decides the background folder and the panel's accent; only the ring uses these two.
+    kept = (festival_days or {}).get(sabbat) or FESTIVAL_DAYS.get(sabbat, 1)
+    festival = sabbat if (day - sabbat_start).days < kept else None
+    gap = None if festival else (sabbat, next_sabbat)
+
     i = day.month - 1
     return DayState(day, hemisphere, sabbat, sabbat_start, next_sabbat, next_start, zodiac, MONTHS[i], NORSE[i], ALMANAC[i],
-                    frac, elong, astro.phase_name(elong), astro.phase_icon(elong), season_event, season_time)
+                    frac, elong, astro.phase_name(elong), astro.phase_icon(elong), season_event, season_time,
+                    festival, gap)

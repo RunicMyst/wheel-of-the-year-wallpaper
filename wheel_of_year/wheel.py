@@ -1,7 +1,8 @@
 """Draw today's wheel from the prepared layers in assets/wheel (Pillow only, no Inkscape).
 
 Spotlight rules: today's Sabbat, zodiac sign, month (both month rings) and - on the day itself -
-solstice/equinox wedge are lit; everything else is gently darkened. Today's moon is brightened
+solstice/equinox wedge are lit; everything else is gently darkened. With festival_only the
+Sabbat ring instead lights only on the days a Sabbat is actually kept. Today's moon is brightened
 and enlarged, the other moons darkened. Wedge art and centre art are cropped into their shapes.
 """
 import json
@@ -78,6 +79,15 @@ def render(assets, st, cfg, wedge_art, centre_art, slot_art=None):
         from .calendar import OPPOSITE
         active = {k: (OPPOSITE.get(v, v) if k in ("sabbat", "wedge") else v) for k, v in active.items()}
 
+    # festival_only: a Sabbat lights only while it is actually being kept. In between, the symbol
+    # slot drawn in that gap lights instead - four of the eight gaps have one, and in the other
+    # four nothing is drawn between the two Sabbats, so the ring rests until the next one arrives.
+    if look["festival_only"]:
+        from .calendar import BETWEEN, OPPOSITE
+        active["sabbat"] = OPPOSITE.get(st.festival, st.festival) if south else st.festival
+        gap = tuple(OPPOSITE.get(n, n) for n in st.gap) if (st.gap and south) else st.gap
+        active["sabbat-slot"] = BETWEEN.get(gap) if gap else None
+
     def load(layer):
         return Image.open(assets / layer["file"])
 
@@ -105,7 +115,8 @@ def render(assets, st, cfg, wedge_art, centre_art, slot_art=None):
         solid.putalpha(mask)
         canvas.alpha_composite(solid, (L["x"], L["y"]))
         if L["ring"] == "sabbat-slot" and (pic := slot_art.get(L["key"])):
-            canvas.alpha_composite(slot_symbol(canvas.size, mask, L["x"], L["y"], L["angle"], pic, look["dim"]))
+            canvas.alpha_composite(slot_symbol(canvas.size, mask, L["x"], L["y"], L["angle"], pic,
+                                                1.0 if lit else look["dim"]))
 
     # 2. outlines, dividers and everything else that never changes
     canvas.alpha_composite(Image.open(assets / "over.png"))

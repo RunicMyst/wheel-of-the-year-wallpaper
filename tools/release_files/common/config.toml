@@ -14,6 +14,11 @@ month_names = "norse"   # month names on the wheel's outer ring and in the panel
                         #   "modern" -> September
                         #   "both"   -> Haustmánuður-September on the ring,
                         #               Haustmánuður (September) in the panel
+accent = "gold"         # colour of the panel's border and its text. Choose one of:
+                        #   a name:    "gold", "oxblood", "iron", "bone", "forest", "night"
+                        #   your own:  "#6a2c2c"
+                        #   "season"   a different colour for each Sabbat (see [accents])
+                        #   "rotate"   a different one of the named colours each day
 corner = "auto"         # "auto" (beside the wheel), "top-left", "top-right",
                         # "bottom-left" or "bottom-right"
 date_format = "day-first"   # "day-first" (Sunday · 20 September 2026)
@@ -23,6 +28,10 @@ clock = "12h"           # "12h" (3:42 PM) or "24h" (15:42)
 show_zodiac = true          # show the zodiac sign next to the Sabbat
 show_illumination = true    # show "68% illuminated"
 show_countdown = false      # show "Mabon in 3 days"
+countdown_style = "days"    # what that line says:
+                            #   "days" -> Mabon in 3 days
+                            #   "date" -> Mabon · 22 September
+                            #   "both" -> Mabon in 3 days · 22 September
 show_moon_times = false     # show "Moonrise 3:42 PM · Moonset 12:11 AM"
 show_sun_times = false      # show "Sunrise 6:15 AM · Sunset 6:27 PM"
 
@@ -35,6 +44,29 @@ show_sun_times = false      # show "Sunrise 6:15 AM · Sunset 6:27 PM"
 #   Yule = "Midwinter"
 
 [sabbat_names]
+
+
+# ----- a colour for each Sabbat (only used when accent = "season") --------------------------
+# Defaults: Samhain oxblood, Yule night, Imbolc bone, Ostara forest, Beltane fire red,
+# Litha gold, Lughnasadh wheat gold, Mabon russet. Override any of them here, e.g.
+#   Samhain = "#5a1f1f"
+#   Yule = "iron"
+
+[accents]
+
+
+# ----- how long each Sabbat is kept (only used when festival_only = true) -------------------
+# Counting from the Sabbat's own date. The defaults follow how each one is actually kept:
+#   Samhain 3   the "three nights of Samonios", and the three-day assembly at Tara
+#   Yule 3      jol as a three-night midwinter feast. The familiar twelve nights are a modern
+#               reconstruction - set Yule = 12 if that is how you keep it
+#   Litha 3     Midsummer in Scandinavia runs about three days around the Eve
+#   everything else 1 day
+# Change any of them, e.g.
+#   Yule = 12
+#   Lughnasadh = 7
+
+[festival_days]
 
 
 # ----- your own dates ------------------------------------------------------------------------
@@ -65,6 +97,13 @@ longitude = ""
 hemisphere = "auto"     # "auto" (from your latitude), "north" or "south".
                         # South of the equator the seasons are six months apart, so the Sabbat
                         # names swap to the opposite side of the wheel.
+festival_only = false   # false -> a Sabbat stays lit all the way to the next one (the whole
+                        #          season), which is how the wheel has always worked.
+                        # true  -> a Sabbat lights only on the days it is actually kept
+                        #          (see [festival_days]). In between, the symbol slot drawn
+                        #          in that gap lights instead; four of the eight gaps have
+                        #          one, and in the other four the Sabbat ring simply rests.
+                        #          The month, moon, zodiac and wedge keep working as always.
 wheel_side = "auto"     # "auto" (the emptier side of the photo), "left" or "right".
                         # A single photo can override this: end its file name with
                         # _wheel-left or _wheel-right

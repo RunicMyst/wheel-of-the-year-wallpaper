@@ -6,7 +6,11 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 OUT = Path(__file__).resolve().parent.parent / "assets" / "icons"
-GOLD, DARK = (214, 176, 106, 255), (26, 22, 30, 255)
+import sys
+# default matches [panel] accent = "oxblood"; pass another colour as an argument
+ACCENT = sys.argv[1] if len(sys.argv) > 1 else "#9c4a4a"
+GOLD = tuple(int(ACCENT[i:i + 2], 16) for i in (1, 3, 5)) + (255,)
+DARK = (26, 22, 30, 255)
 
 
 def gear(size=512, teeth=8):

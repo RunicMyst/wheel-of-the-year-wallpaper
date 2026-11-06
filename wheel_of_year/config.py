@@ -9,19 +9,24 @@ import tomllib
 DEFAULTS = {
     "panel": {
         "month_names": "norse",        # norse | modern | both  (outer ring + panel)
+        "accent": "gold",              # a name, "#rrggbb", "season" (follows the Sabbat) or "rotate"
         "corner": "auto",              # auto | top-left | top-right | bottom-left | bottom-right
         "date_format": "day-first",    # day-first | month-first
         "clock": "12h",                # 12h | 24h
         "show_zodiac": True,
         "show_illumination": True,
         "show_countdown": False,       # "Mabon in 3 days"
+        "countdown_style": "days",     # days | date | both
         "show_moon_times": False,      # "Moonrise 3:42 PM · Moonset 1:18 AM"
         "show_sun_times": False,
     },
     "sabbat_names": {},                # e.g. Lughnasadh = "Lammas"
+    "festival_days": {},               # how long each Sabbat is kept, e.g. Samhain = 3
+    "accents": {},                     # per-Sabbat colours when accent = "season"
     "dates": {},                       # e.g. "10-31" = "Ancestor night"
     "location": {"latitude": "", "longitude": ""},
     "look": {
+        "festival_only": False,        # light a Sabbat only on the days it is actually kept
         "hemisphere": "auto",          # auto | north | south
         "wheel_side": "auto",          # auto | left | right
         "wheel_height": 0.78,
@@ -41,6 +46,7 @@ CHOICES = {
     ("panel", "corner"): ["auto", "top-left", "top-right", "bottom-left", "bottom-right"],
     ("panel", "date_format"): ["day-first", "month-first"],
     ("panel", "clock"): ["12h", "24h"],
+    ("panel", "countdown_style"): ["days", "date", "both"],
     ("look", "hemisphere"): ["auto", "north", "south"],
     ("look", "wheel_side"): ["auto", "left", "right"],
 }
@@ -55,10 +61,20 @@ RANGES = {  # numbers that must stay sensible
 COLOURS = [("look", k) for k in ("norse_ring", "almanac_ring", "zodiac_ring", "sabbat_ring")]
 
 
+def _accent_ok(value):
+    from .compose import ACCENTS
+    v = str(value).strip().lower()
+    return v in ACCENTS or v in ("season", "rotate") or re.fullmatch(r"#[0-9a-f]{6}", v) is not None
+
+
 def _check(section, key, value, default, notes):
     def bad(why):
         notes.append(f'{key}: {why}, got {value!r} - using {default!r}')
         return default
+    if (section, key) == ("panel", "accent"):
+        return str(value).strip().lower() if _accent_ok(value) else bad(
+            'expected a colour name (oxblood, gold, iron, bone, forest, night), "season", '
+            '"rotate" or "#rrggbb"')
     if (section, key) in CHOICES:
         if not isinstance(value, str) or value.lower() not in CHOICES[(section, key)]:
             return bad("expected one of " + ", ".join(CHOICES[(section, key)]))
@@ -102,7 +118,19 @@ def load(path):
         if section not in cfg:
             notes.append(f"[{section}]: not a known section - ignored")
             continue
-        if section in ("dates", "sabbat_names"):  # free-form tables
+        if section == "festival_days":
+            from .calendar import FESTIVAL_DAYS
+            for key, value in values.items():
+                name = str(key).strip().capitalize()
+                if name not in FESTIVAL_DAYS:
+                    notes.append(f"[festival_days] {key}: not a Sabbat name - ignored")
+                elif isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 120:
+                    notes.append(f"[festival_days] {key}: expected a whole number of days between "
+                                 f"1 and 120, got {value!r} - ignored")
+                else:
+                    cfg[section][name] = value
+            continue
+        if section in ("dates", "sabbat_names", "accents"):  # free-form tables
             cfg[section].update({str(k): str(v) for k, v in values.items()})
             continue
         for key, value in values.items():

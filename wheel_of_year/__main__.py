@@ -56,7 +56,7 @@ def run(args):
 
     place = location.find(cfg)
     where = location.hemisphere(cfg, place)
-    st = calendar.state_for(args.date, hemisphere=where)
+    st = calendar.state_for(args.date, hemisphere=where, festival_days=cfg["festival_days"])
     picture_notes = []
     photo = folders.pick(HOME / "backgrounds" / st.sabbat, st.day, HOME / "backgrounds" / "Any", picture_notes)
     art = folders.wedge_art(HOME / "wedges", st.day, picture_notes)
@@ -77,7 +77,7 @@ def run(args):
         out = outdir / f"wheel-of-the-year-{st.day.isoformat()}-{datetime.now():%H%M%S}.jpg"
     image.save(out, quality=95)
     log(f"v{__version__}  {st.day}: {st.sabbat} · {st.zodiac} · {st.norse_month}/{st.almanac_moon} · {st.moon_phase} "
-        f"{round(st.moon_fraction * 100)}%" + (f" · {st.season_event}" if st.season_event else "")
+        f"{round(st.moon_fraction * 100)}%" + (f" · {st.festival} today" if st.festival else "") + (f" · {st.season_event}" if st.season_event else "")
         + f" | background: {photo.name if photo else 'none (black)'}, wheel {side}, wedge art {len(art)}/12, ring symbols {len(slots)}/4, "
         f"centre {centre.name if centre else 'Vegvísir'} | {w}x{h} | {where}"
         + (f", {location.pretty(place)} ({place[2]})" if place else ", location unknown")
