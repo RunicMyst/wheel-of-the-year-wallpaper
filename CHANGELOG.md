@@ -8,7 +8,7 @@ line of `build/log.txt`, so you can always tell which copy someone is running.
 First public release.
 
 - **A Sabbat can now light only on the days it is actually kept.** Set `festival_only = true`
-  and Samhain lights on 31 October alone, Yule for the twelve nights, and so on. In between,
+  and Samhain lights for its three nights, Yule for its three, and so on. In between,
   the symbol slot drawn in that gap lights instead — which finally gives the four Sabbat-ring
   symbols something to do, about 170 days of the year. In the four gaps where the wheel has no
   slot drawn, the Sabbat ring simply rests until the next Sabbat arrives. The month ring, moon
