@@ -48,7 +48,7 @@ $set.IconLocation     = Join-Path $App 'assets\icons\settings.ico'
 $set.Description      = 'Change how the Wheel of the Year wallpaper looks'
 $set.Save()
 
-# One folder on the desktop holding all three shortcuts, so everything is in the same place.
+# One folder on the desktop holding everything, so it is all in the same place.
 $Folder = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Wheel of the Year'
 New-Item -ItemType Directory -Path $Folder -Force | Out-Null
 
@@ -65,10 +65,28 @@ $upd.IconLocation     = Join-Path $App 'assets\icons\update.ico'
 $upd.Description      = "Redraw today's wallpaper with your latest pictures and settings"
 $upd.Save()
 
-$pics = $ws.CreateShortcut((Join-Path $Folder 'Pictures.lnk'))
-$pics.TargetPath   = Join-Path $Root 'backgrounds'
-$pics.Description  = 'The folders the wallpaper reads: backgrounds, wedges, sabbat-ring, centre'
-$pics.Save()
+# All four picture folders, not just the backgrounds. A single "Pictures" shortcut pointing at
+# backgrounds hid the other three - the wedges, the ring symbols and the centre - with nothing
+# leading to them. The ring symbols matter more than they look: with festival_only they are what
+# lights between one Sabbat and the next.
+$Pics = Join-Path $Folder 'Pictures'
+New-Item -ItemType Directory -Path $Pics -Force | Out-Null
+Remove-Item (Join-Path $Folder 'Pictures.lnk') -ErrorAction SilentlyContinue   # older versions
+Remove-Item (Join-Path $Pics 'Ring symbols.lnk') -ErrorAction SilentlyContinue # called that briefly
+
+foreach ($pair in @(@('Backgrounds','backgrounds'), @('Wedges','wedges'),
+                    @('Sabbat ring','sabbat-ring'), @('Centre','center'))) {
+    $link = $ws.CreateShortcut((Join-Path $Pics ($pair[0] + '.lnk')))
+    $link.TargetPath = Join-Path $Root $pair[1]
+    $link.Save()
+}
+
+# Straight to the install folder too: the README, the CHANGELOG, install.ps1 and build\log.txt
+# (the file to send if something goes wrong) all live there, and it is easily lost track of.
+$prog = $ws.CreateShortcut((Join-Path $Folder 'Program folder.lnk'))
+$prog.TargetPath  = $Root
+$prog.Description = 'The install itself: README, log, Install and Uninstall'
+$prog.Save()
 
 # tidy away loose icons older versions left on the desktop
 foreach ($old in @('Wheel of the Year Settings.lnk', 'Wheel of the Year Update Now.lnk')) {
@@ -85,4 +103,5 @@ Write-Host 'Wheel of the Year @VERSION@'
 Write-Host 'Installed. The wallpaper now refreshes every night at 00:01 and when you log in.'
 Write-Host 'If you move this folder, run Install again.'
 Write-Host 'On your desktop there is now a "Wheel of the Year" folder holding Settings,'
-Write-Host 'Update Wallpaper Now, and Pictures (the folders it reads).'
+Write-Host 'Update Wallpaper Now, Pictures (Backgrounds, Wedges, Sabbat ring, Centre)'
+Write-Host 'and Program folder (the install itself - README, log, Install and Uninstall).'

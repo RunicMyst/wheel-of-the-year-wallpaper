@@ -3,6 +3,23 @@
 Newest first. Version numbers appear in the zip name, at the top of the README, and on every
 line of `build/log.txt`, so you can always tell which copy someone is running.
 
+## 1.0.1 — 7 November 2026
+
+- **The Pictures shortcut now opens all four picture folders**, not just the backgrounds. It was
+  a folder called "Pictures" that hid three quarters of your pictures — the wedges, the ring
+  symbols and the centre were one level up with nothing pointing at them. It now holds
+  **Backgrounds**, **Wedges**, **Sabbat ring** and **Centre** side by side. The ring symbols
+  matter more than they used to: with `festival_only` they are what lights between Sabbats.
+- **Fixed: the desktop shortcuts showed as "...desktop" and asked what to do when opened.** A
+  launcher only counts as one where the desktop trusts it, which on KDE means an applications
+  directory. The old fix used `gio set metadata::trusted`, a GNOME convention that KDE answers
+  "not supported" to — so it had never worked. The shortcuts are now links to the trusted copies
+  and open straight away.
+- **Added a "Program folder" link** to the same desktop folder, so the install itself — the
+  README, the CHANGELOG, `install.sh` and `build/log.txt` (the file to send if something goes
+  wrong) — is one click away instead of something to go hunting for.
+- **Settings gets its gear icon back** in the desktop folder, instead of a plain `Settings.toml`.
+
 ## 1.0.0 — 5 November 2026
 
 First public release.

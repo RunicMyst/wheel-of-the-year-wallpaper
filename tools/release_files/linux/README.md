@@ -50,9 +50,10 @@ and would be willing to test it, please open an issue — that's all that's hold
    ```
 
 That's it. Today's wallpaper appears straight away, and a **"Wheel of the Year" folder** appears
-on your desktop holding three shortcuts: **Settings**, **Update Wallpaper Now**, and
-**Pictures** (which opens the folders the wallpaper reads). From then on it refreshes every night at
-00:01 and shortly after you log in (so it catches up if the computer was off or asleep).
+on your desktop holding **Settings**, **Update Wallpaper Now**, **Program folder** (the install
+itself — README, log, `install.sh`) and **Pictures**, which opens onto all four picture folders:
+**Backgrounds**, **Wedges**, **Sabbat ring** and **Centre**. From then on it refreshes every night
+at 00:01 and shortly after you log in (so it catches up if the computer was off or asleep).
 
 The program runs from this folder — nothing is copied anywhere else. **If you move or rename
 this folder, run `./install.sh` again.**

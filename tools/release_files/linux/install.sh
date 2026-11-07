@@ -12,8 +12,15 @@ SHORTCUTS="$DESKTOP_DIR/Wheel of the Year"      # one folder on the desktop hold
 if [[ "${1:-}" == "--remove" ]]; then
     systemctl --user disable --now "$NAME.timer" 2>/dev/null || true
     rm -f "$UNIT_DIR/$NAME.service" "$UNIT_DIR/$NAME.timer" "$DIR/Settings.desktop" "$DIR/Update Now.desktop" "$DIR/Pictures.desktop"
-    rm -f "$SHORTCUTS"/*.desktop "$SHORTCUTS/Pictures" "$SHORTCUTS/Settings.toml" 2>/dev/null
-    rmdir "$SHORTCUTS" 2>/dev/null
+    # Only the links we made, by name - anything of the user's own in there is left alone, and
+    # the folder itself only goes if that leaves it empty.
+    rm -f "$SHORTCUTS/Settings.desktop" "$SHORTCUTS/Update Wallpaper Now.desktop" \
+          "$SHORTCUTS/Settings.toml" "$SHORTCUTS/Pictures.desktop" "$SHORTCUTS/Program folder" 2>/dev/null
+    rm -f "$SHORTCUTS/Pictures/Backgrounds" "$SHORTCUTS/Pictures/Wedges" \
+          "$SHORTCUTS/Pictures/Sabbat ring" "$SHORTCUTS/Pictures/Ring symbols" \
+          "$SHORTCUTS/Pictures/Centre" 2>/dev/null
+    rm -f "$SHORTCUTS/Pictures" 2>/dev/null          # a plain symlink in 1.0.0 and earlier
+    rmdir "$SHORTCUTS/Pictures" "$SHORTCUTS" 2>/dev/null || true
     rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/wheel-of-the-year-"*.desktop
     rm -f "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
           "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"   # loose icons from older versions
@@ -30,6 +37,11 @@ python3 -c "import PIL" 2>/dev/null || {
     echo "  Fedora:                      sudo dnf install python3-pillow"
     echo "  Arch/Manjaro:                sudo pacman -S python-pillow"
     exit 1; }
+
+# What the Pictures launcher opens: the four-folder view in the desktop folder when there is a
+# desktop, otherwise the install folder itself.
+PICS_VIEW="$DIR"
+[[ -d "$DESKTOP_DIR" ]] && PICS_VIEW="$SHORTCUTS/Pictures"
 
 # First install: start from the default settings. Later updates keep the ones you have.
 [[ -f "$DIR/config.toml" ]] || cp "$DIR/config.default.toml" "$DIR/config.toml"
@@ -88,38 +100,54 @@ cat > "$DIR/Pictures.desktop" <<LAUNCH
 Type=Application
 Name=Wheel of the Year Pictures
 Comment=Open the folders the wallpaper actually reads
-Exec=xdg-open "$DIR/backgrounds"
+Exec=xdg-open "$PICS_VIEW"
 Icon=folder-pictures
 Terminal=false
 Categories=Utility;
 LAUNCH
 chmod +x "$DIR/Pictures.desktop"
 
-# All three in one folder on the desktop, so everything is in the same place.
+# The application menu first, because the desktop folder links to these copies.
 #
-# Plain links where possible: KDE asks "what do you wish to do with this file?" before running
-# a launcher that isn't directly on the desktop, and a link to a folder or a text file opens
-# straight away with no questions.
-if [[ -d "$DESKTOP_DIR" ]]; then
-    mkdir -p "$SHORTCUTS"
-    rm -f "$SHORTCUTS/Settings.desktop" "$SHORTCUTS/Pictures.desktop"      # older versions
-    ln -sfn "$DIR/backgrounds" "$SHORTCUTS/Pictures"
-    ln -sfn "$DIR/config.toml" "$SHORTCUTS/Settings.toml"
-    sed 's/^Name=.*/Name=Update Wallpaper Now/' "$DIR/Update Now.desktop" > "$SHORTCUTS/Update Wallpaper Now.desktop"
-    chmod +x "$SHORTCUTS/Update Wallpaper Now.desktop"
-    gio set "$SHORTCUTS/Update Wallpaper Now.desktop" metadata::trusted true 2>/dev/null || true
-    # tidy away the loose icons older versions put straight on the desktop
-    rm -f "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
-          "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"
-fi
-
-# Also in the application menu, where launching never prompts: search "Wheel of the Year".
+# A .desktop file only counts as a launcher where the desktop environment trusts it, and on KDE
+# that means one of the applications directories - a copy sitting in a folder of our own is shown
+# as a plain file called "...desktop" and asks what to do with it when opened. A symbolic link to
+# the trusted copy launches straight away, so that is what goes in the desktop folder below.
+# (The old "gio set metadata::trusted" is a GNOME convention; KDE answers "not supported".)
 APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
 mkdir -p "$APPS"
 sed 's/^Name=.*/Name=Wheel of the Year Settings/' "$DIR/Settings.desktop" > "$APPS/wheel-of-the-year-settings.desktop"
 sed 's/^Name=.*/Name=Wheel of the Year Update Now/' "$DIR/Update Now.desktop" > "$APPS/wheel-of-the-year-update.desktop"
 sed 's/^Name=.*/Name=Wheel of the Year Pictures/' "$DIR/Pictures.desktop" > "$APPS/wheel-of-the-year-pictures.desktop"
+chmod +x "$APPS"/wheel-of-the-year-*.desktop
 update-desktop-database "$APPS" 2>/dev/null || true
+
+# Everything in one folder on the desktop, so it is all in the same place.
+if [[ -d "$DESKTOP_DIR" ]]; then
+    mkdir -p "$SHORTCUTS/Pictures"
+    rm -f "$SHORTCUTS/Settings.desktop" "$SHORTCUTS/Pictures.desktop" \
+          "$SHORTCUTS/Update Wallpaper Now.desktop" "$SHORTCUTS/Settings.toml"   # older versions
+    [[ -L "$SHORTCUTS/Pictures" ]] && rm -f "$SHORTCUTS/Pictures" && mkdir -p "$SHORTCUTS/Pictures"
+
+    # All four picture folders, not just the backgrounds. The ring symbols matter more than they
+    # look: with festival_only they are what lights between one Sabbat and the next.
+    rm -f "$SHORTCUTS/Pictures/Ring symbols"    # called that briefly in 1.0.1
+    ln -sfn "$DIR/backgrounds"  "$SHORTCUTS/Pictures/Backgrounds"
+    ln -sfn "$DIR/wedges"       "$SHORTCUTS/Pictures/Wedges"
+    ln -sfn "$DIR/sabbat-ring"  "$SHORTCUTS/Pictures/Sabbat ring"
+    ln -sfn "$DIR/center"       "$SHORTCUTS/Pictures/Centre"
+
+    # Straight to the install folder too: the README, the CHANGELOG, build/log.txt (the file to
+    # send if something goes wrong) and install.sh all live there, and it is easily lost track of.
+    ln -sfn "$DIR" "$SHORTCUTS/Program folder"
+
+    ln -sfn "$APPS/wheel-of-the-year-settings.desktop" "$SHORTCUTS/Settings.desktop"
+    ln -sfn "$APPS/wheel-of-the-year-update.desktop"   "$SHORTCUTS/Update Wallpaper Now.desktop"
+
+    # tidy away the loose icons older versions put straight on the desktop
+    rm -f "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
+          "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"
+fi
 
 systemctl --user daemon-reload
 systemctl --user enable --now "$NAME.timer"
@@ -130,7 +158,8 @@ echo "Wheel of the Year @VERSION@"
 echo "Installed. The wallpaper refreshes every night at 00:01 and shortly after you log in."
 echo "If you move this folder, run ./install.sh again."
 echo "On your desktop there is now a \"Wheel of the Year\" folder holding:"
-echo "  Pictures          - the folders it reads"
-echo "  Settings.toml     - change how it looks"
+echo "  Pictures          - Backgrounds, Wedges, Sabbat ring and Centre"
+echo "  Settings          - change how it looks"
+echo "  Program folder    - the install itself: README, log, install.sh"
 echo "  Update Wallpaper Now - redraw it straight away"
 echo "They are in the application menu too: search for \"Wheel of the Year\"."

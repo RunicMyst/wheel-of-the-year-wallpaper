@@ -38,8 +38,9 @@ INSTALL
 
    A black window opens for a few seconds, draws today's wallpaper and sets it.
    Press any key to close it. A folder called "Wheel of the Year" appears on your desktop
-   with three shortcuts inside: Settings, Update Wallpaper Now, and Pictures (which opens
-   the folders the wallpaper reads).
+   holding Settings, Update Wallpaper Now, Program folder (the install itself - README, log,
+   Install and Uninstall), and Pictures, which opens onto all four picture folders:
+   Backgrounds, Wedges, Sabbat ring and Centre.
 
    If Windows shows "Windows protected your PC", click "More info" then "Run anyway".
    This appears for any file downloaded from the internet that isn't from a big company.
