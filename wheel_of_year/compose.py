@@ -91,13 +91,24 @@ def _clock(t, style="12h"):
     return f"{t.hour % 12 or 12}:{t.minute:02d} {'AM' if t.hour < 12 else 'PM'}"  # (no %-I on Windows)
 
 
+# Old Norse weekday names, indexed by date.weekday() (Monday = 0). Monday is also attested as
+# "mánudagr". Iceland later replaced the four god-named days with neutral numbered ones, so these
+# are the older pagan forms rather than modern Icelandic.
+NORSE_DAYS = ["mánadagr", "týsdagr", "óðinsdagr", "þórsdagr", "frjádagr", "laugardagr", "sunnudagr"]
+
+
+def _weekday(d, names):
+    return NORSE_DAYS[d.weekday()] if names == "norse" else f"{d:%A}"
+
+
 def _date_short(d, style):
     """Just the day and month, for the countdown line: "21 December" / "December 21"."""
     return f"{d.day} {d:%B}" if style == "day-first" else f"{d:%B} {d.day}"
 
 
-def _date(d, style):
-    return f"{d:%A} · {d.day} {d:%B} {d.year}" if style == "day-first" else f"{d:%A} · {d:%B} {d.day}, {d.year}"
+def _date(d, style, day_names="modern"):
+    day = _weekday(d, day_names)
+    return f"{day} · {d.day} {d:%B} {d.year}" if style == "day-first" else f"{day} · {d:%B} {d.day}, {d.year}"
 
 
 def sabbat_name(cfg, name):
@@ -163,7 +174,7 @@ def month_line(st, style):
 def panel_lines(st, cfg, place):
     """The panel's contents: (text, style key) in order."""
     p = cfg["panel"]
-    lines = [(_date(st.day, p["date_format"]), "date"), (st.moon_phase, "phase")]
+    lines = [(_date(st.day, p["date_format"], p["day_names"]), "date"), (st.moon_phase, "phase")]
     if p["show_illumination"]:
         lines.append((f"{round(st.moon_fraction * 100)}% illuminated", "pct"))
     if p["show_moon_times"] and place:

@@ -3,6 +3,21 @@
 Newest first. Version numbers appear in the zip name, at the top of the README, and on every
 line of `build/log.txt`, so you can always tell which copy someone is running.
 
+## 1.1.0 — 21 November 2026
+
+- **The day of the week can now be written in Old Norse.** Set `day_names = "norse"` under
+  `[panel]` and the panel reads **þórsdagr** where it used to read Thursday. The week
+  runs mánadagr, týsdagr, óðinsdagr, þórsdagr, frjádagr, laugardagr, sunnudagr — four of them
+  named for Máni, Týr, Óðinn and Þórr, which is where the English Tuesday, Wednesday, Thursday
+  and Friday get their names too. These are the older forms: Iceland later swapped the four
+  god-named days for neutral numbered ones, so modern Icelandic no longer uses them. Pairs with
+  `month_names = "norse"` if you want the whole panel in the older names.
+  `day_names = "modern"` is the default, so nothing changes unless you ask for it.
+- **Fixed: both READMEs said Yule defaults to 12 days.** It defaults to 3 — the three-night
+  midwinter feast — exactly as the 1.0.0 notes and the comments in `config.toml` say. The wrong
+  number was only ever in those two settings tables; the program itself has always used 3, and
+  `Yule = 12` is still yours to set if you keep the twelve nights.
+
 ## 1.0.1 — 7 November 2026
 
 - **The Pictures shortcut now opens all four picture folders**, not just the backgrounds. It was

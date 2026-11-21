@@ -13,6 +13,7 @@ DEFAULTS = {
         "corner": "auto",              # auto | top-left | top-right | bottom-left | bottom-right
         "date_format": "day-first",    # day-first | month-first
         "clock": "12h",                # 12h | 24h
+        "day_names": "modern",         # modern | norse  (Thursday / þórsdagr)
         "show_zodiac": True,
         "show_illumination": True,
         "show_countdown": False,       # "Mabon in 3 days"
@@ -46,6 +47,7 @@ CHOICES = {
     ("panel", "corner"): ["auto", "top-left", "top-right", "bottom-left", "bottom-right"],
     ("panel", "date_format"): ["day-first", "month-first"],
     ("panel", "clock"): ["12h", "24h"],
+    ("panel", "day_names"): ["modern", "norse"],
     ("panel", "countdown_style"): ["days", "date", "both"],
     ("look", "hemisphere"): ["auto", "north", "south"],
     ("look", "wheel_side"): ["auto", "left", "right"],

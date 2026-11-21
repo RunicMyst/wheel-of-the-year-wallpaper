@@ -24,6 +24,9 @@ corner = "auto"         # "auto" (beside the wheel), "top-left", "top-right",
 date_format = "day-first"   # "day-first" (Sunday · 20 September 2026)
                             # "month-first" (Sunday · September 20, 2026)
 clock = "12h"           # "12h" (3:42 PM) or "24h" (15:42)
+day_names = "modern"    # the day of the week in the panel:
+                        #   "modern" -> Thursday
+                        #   "norse"  -> þórsdagr
 
 show_zodiac = true          # show the zodiac sign next to the Sabbat
 show_illumination = true    # show "68% illuminated"
