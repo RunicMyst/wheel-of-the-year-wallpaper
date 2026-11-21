@@ -3,6 +3,23 @@
 Newest first. Version numbers appear in the zip name, at the top of the README, and on every
 line of `build/log.txt`, so you can always tell which copy someone is running.
 
+## 1.1.1 — 21 November 2026
+
+Both of these are about **Uninstall**. Nothing about the wallpaper itself changed, and you only
+need this version if you ever intend to remove the program.
+
+- **Fixed: Uninstall stopped halfway on Linux, without saying so.** It cleared the daily timer
+  and the desktop folder's links, then hit a line meant to tidy up a leftover from 1.0.0 and
+  quit with no message at all. Left behind: the entries in your applications menu, any loose
+  desktop icons, and the "Removed." confirmation — so it looked like nothing had happened, and
+  running it again changed nothing. If you have uninstalled since 1.0.1 and still have a
+  "Wheel of the Year" entry in your menu, this is why; installing and uninstalling this version
+  clears it.
+- **Fixed: Uninstall on Windows deleted the whole "Wheel of the Year" desktop folder**, including
+  anything you had put in it yourself. It now removes only the shortcuts it created, and removes
+  the folder only if that leaves it empty — which is what the Linux side has done since 1.0.1
+  and what it always should have done on both.
+
 ## 1.1.0 — 21 November 2026
 
 - **The day of the week can now be written in Old Norse.** Set `day_names = "norse"` under

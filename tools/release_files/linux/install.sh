@@ -9,21 +9,26 @@ NAME=wheel-of-the-year
 DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"
 SHORTCUTS="$DESKTOP_DIR/Wheel of the Year"      # one folder on the desktop holding all three
 
+# Delete one of our shortcuts, but only if it is a link or a file. A real folder in there is the
+# user's own, so it is skipped instead - which is also what keeps `set -e` from stopping the
+# uninstall halfway: `rm -f` on a folder fails, and with stderr hidden it stopped in silence.
+rm_ours() { local f; for f in "$@"; do [[ -L "$f" || -f "$f" ]] && rm -f "$f"; done; return 0; }
+
 if [[ "${1:-}" == "--remove" ]]; then
     systemctl --user disable --now "$NAME.timer" 2>/dev/null || true
-    rm -f "$UNIT_DIR/$NAME.service" "$UNIT_DIR/$NAME.timer" "$DIR/Settings.desktop" "$DIR/Update Now.desktop" "$DIR/Pictures.desktop"
+    rm_ours "$UNIT_DIR/$NAME.service" "$UNIT_DIR/$NAME.timer" "$DIR/Settings.desktop" "$DIR/Update Now.desktop" "$DIR/Pictures.desktop"
     # Only the links we made, by name - anything of the user's own in there is left alone, and
     # the folder itself only goes if that leaves it empty.
-    rm -f "$SHORTCUTS/Settings.desktop" "$SHORTCUTS/Update Wallpaper Now.desktop" \
-          "$SHORTCUTS/Settings.toml" "$SHORTCUTS/Pictures.desktop" "$SHORTCUTS/Program folder" 2>/dev/null
-    rm -f "$SHORTCUTS/Pictures/Backgrounds" "$SHORTCUTS/Pictures/Wedges" \
-          "$SHORTCUTS/Pictures/Sabbat ring" "$SHORTCUTS/Pictures/Ring symbols" \
-          "$SHORTCUTS/Pictures/Centre" 2>/dev/null
-    rm -f "$SHORTCUTS/Pictures" 2>/dev/null          # a plain symlink in 1.0.0 and earlier
+    rm_ours "$SHORTCUTS/Settings.desktop" "$SHORTCUTS/Update Wallpaper Now.desktop" \
+            "$SHORTCUTS/Settings.toml" "$SHORTCUTS/Pictures.desktop" "$SHORTCUTS/Program folder"
+    rm_ours "$SHORTCUTS/Pictures/Backgrounds" "$SHORTCUTS/Pictures/Wedges" \
+            "$SHORTCUTS/Pictures/Sabbat ring" "$SHORTCUTS/Pictures/Ring symbols" \
+            "$SHORTCUTS/Pictures/Centre"
+    rm_ours "$SHORTCUTS/Pictures"                    # a plain symlink in 1.0.0 and earlier
     rmdir "$SHORTCUTS/Pictures" "$SHORTCUTS" 2>/dev/null || true
-    rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/wheel-of-the-year-"*.desktop
-    rm -f "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
-          "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"   # loose icons from older versions
+    rm_ours "${XDG_DATA_HOME:-$HOME/.local/share}/applications/wheel-of-the-year-"*.desktop
+    rm_ours "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
+            "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"   # loose icons from older versions
     systemctl --user daemon-reload
     echo "Removed. Your current wallpaper stays until you change it."
     exit 0
