@@ -47,3 +47,6 @@ __pycache__/
 
 # the workshop copy's own settings (the template is tools/release_files/common/config.toml)
 /config.toml
+
+# Local working notes - names machines and paths; the repo is public.
+HANDOFF.md
