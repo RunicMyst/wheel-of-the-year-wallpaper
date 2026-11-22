@@ -85,16 +85,21 @@ Remove-WotyDesktopFolder -Folder $f3
 if (Test-Path $f3) { Write-Host 'FAIL  3: desktop.ini stopped the folder being removed'; $fail++ }
 else              { Write-Host 'pass  3: desktop.ini ignored, folder removed' }
 
-# 4. For comparison: what the pre-1.1.1 line did to the same layout.
+# 4. Negative control. The checks above are only worth anything if they can fail, so run the
+#    pre-1.1.1 logic over the same layout and insist it IS caught. If a run ever reports this
+#    as passing, test 2 has stopped discriminating and the whole suite is decoration.
 $f4 = New-Layout -Base (Join-Path $Root 't4') -WithUserFiles
-Remove-Item $f4 -Recurse -Force
+Remove-Item $f4 -Recurse -Force          # what uninstall.ps1 did before 1.1.1
 if (Test-Path (Join-Path $f4 'my notes.txt')) {
-    Write-Host 'note  4: the old code kept the note - unexpected, say so'
+    Write-Host 'FAIL  4: negative control - the old code did NOT delete the user note,'
+    Write-Host '         so test 2 proves nothing. Do not trust this run.'
+    $fail++
 } else {
-    Write-Host 'note  4: the old code deleted the user note - that is the bug 1.1.1 fixed'
+    Write-Host 'pass  4: negative control - the old code deletes the user note, so test 2 has teeth'
 }
 
 Write-Host ''
 if ($fail -eq 0) { Write-Host 'ALL TESTS PASSED' } else { Write-Host "$fail TEST(S) FAILED" }
 Remove-Item $Root -Recurse -Force
 Write-Host "Sandbox removed: $Root"
+if ($fail -ne 0) { exit 1 }
