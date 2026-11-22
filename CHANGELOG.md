@@ -3,6 +3,14 @@
 Newest first. Version numbers appear in the zip name, at the top of the README, and on every
 line of `build/log.txt`, so you can always tell which copy someone is running.
 
+## 1.1.2 — 22 November 2026
+
+- **Fixed: Uninstall could delete a launcher of your own.** It cleared its applications-menu
+  entries with the wildcard `wheel-of-the-year-*.desktop`, which also matches any launcher you
+  made yourself whose filename happens to start the same way — it would have been removed
+  without a word. Uninstall now names its own three entries instead, and leaves everything else
+  alone. Same principle as 1.1.1: remove only what we put there.
+
 ## 1.1.1 — 21 November 2026
 
 Both of these are about **Uninstall**. Nothing about the wallpaper itself changed, and you only

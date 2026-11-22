@@ -26,7 +26,11 @@ if [[ "${1:-}" == "--remove" ]]; then
             "$SHORTCUTS/Pictures/Centre"
     rm_ours "$SHORTCUTS/Pictures"                    # a plain symlink in 1.0.0 and earlier
     rmdir "$SHORTCUTS/Pictures" "$SHORTCUTS" 2>/dev/null || true
-    rm_ours "${XDG_DATA_HOME:-$HOME/.local/share}/applications/wheel-of-the-year-"*.desktop
+    # By name, not by wildcard: "wheel-of-the-year-*.desktop" would also sweep up a launcher
+    # someone made themselves that happens to start the same way.
+    APPS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    rm_ours "$APPS_DIR/wheel-of-the-year-settings.desktop" "$APPS_DIR/wheel-of-the-year-update.desktop" \
+            "$APPS_DIR/wheel-of-the-year-pictures.desktop"
     rm_ours "$DESKTOP_DIR/Wheel of the Year Settings.desktop" "$DESKTOP_DIR/Wheel of the Year Update Now.desktop" \
             "$DESKTOP_DIR/Wheel of the Year Pictures.desktop"   # loose icons from older versions
     systemctl --user daemon-reload
@@ -124,7 +128,8 @@ mkdir -p "$APPS"
 sed 's/^Name=.*/Name=Wheel of the Year Settings/' "$DIR/Settings.desktop" > "$APPS/wheel-of-the-year-settings.desktop"
 sed 's/^Name=.*/Name=Wheel of the Year Update Now/' "$DIR/Update Now.desktop" > "$APPS/wheel-of-the-year-update.desktop"
 sed 's/^Name=.*/Name=Wheel of the Year Pictures/' "$DIR/Pictures.desktop" > "$APPS/wheel-of-the-year-pictures.desktop"
-chmod +x "$APPS"/wheel-of-the-year-*.desktop
+chmod +x "$APPS/wheel-of-the-year-settings.desktop" "$APPS/wheel-of-the-year-update.desktop" \
+         "$APPS/wheel-of-the-year-pictures.desktop"
 update-desktop-database "$APPS" 2>/dev/null || true
 
 # Everything in one folder on the desktop, so it is all in the same place.
