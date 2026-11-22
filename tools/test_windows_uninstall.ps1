@@ -1,17 +1,43 @@
 # Maintainer test for the Windows uninstall logic (release_files/windows/app/uninstall.ps1).
 #
-# SAFE TO RUN ON ANY WINDOWS MACHINE. It installs nothing. It creates and deletes files only
-# inside a new folder under %TEMP%, and it never touches the real Desktop, the Startup folder,
-# the registry, or any scheduled task.
+# It DOT-SOURCES the real uninstall.ps1 and tests the function it defines, so this cannot drift
+# from what ships. Dot-sourcing that file only defines the function; it performs no uninstall.
 #
-# NOTE: the cleanup block below is a COPY of the one in uninstall.ps1. If you change the real
-# script, change this one to match - otherwise this tests code that no longer ships.
+# SAFE TO RUN ON ANY WINDOWS MACHINE. It installs nothing. It creates and deletes files only
+# inside a new folder under the temp directory, and it never touches the real Desktop, the
+# Startup folder, the registry, or any scheduled task.
 #
 #   powershell -ExecutionPolicy Bypass -File test_windows_uninstall.ps1
+#
+# It also runs under PowerShell 7 on Linux, so it can be run in a throwaway container.
+
+param([string]$UninstallScript)
 
 $ErrorActionPreference = 'Stop'
-$Root = Join-Path $env:TEMP ('woty-uninstall-test-' + [guid]::NewGuid().ToString('N').Substring(0,8))
+# %TEMP% on Windows; GetTempPath() also covers PowerShell on Linux, so this can be run in a
+# throwaway container as well as on a real Windows box.
+$TempBase = if ($env:TEMP) { $env:TEMP } else { [System.IO.Path]::GetTempPath() }
+$Root = Join-Path $TempBase ('woty-uninstall-test-' + [guid]::NewGuid().ToString('N').Substring(0,8))
 Write-Host "Sandbox: $Root"
+Write-Host ''
+
+if (-not $UninstallScript) {
+    foreach ($c in @((Join-Path $PSScriptRoot 'uninstall.ps1'),
+                     (Join-Path $PSScriptRoot 'release_files/windows/app/uninstall.ps1'))) {
+        if (Test-Path $c -PathType Leaf) { $UninstallScript = $c; break }
+    }
+}
+if (-not ($UninstallScript -and (Test-Path $UninstallScript -PathType Leaf))) {
+    Write-Host 'FAIL: could not find uninstall.ps1 - pass -UninstallScript <path>'; exit 2
+}
+Write-Host "Testing: $UninstallScript"
+
+$marker = Join-Path $Root 'main-body-ran.txt'
+. $UninstallScript
+if (-not (Get-Command Remove-WotyDesktopFolder -ErrorAction SilentlyContinue)) {
+    Write-Host 'FAIL: dot-sourcing uninstall.ps1 did not define Remove-WotyDesktopFolder'; exit 2
+}
+Write-Host 'pass  0: dot-sourcing defines the function and runs no uninstall'
 Write-Host ''
 
 function New-Layout {
@@ -19,10 +45,10 @@ function New-Layout {
     $Folder = Join-Path $Base 'Wheel of the Year'
     $Pics   = Join-Path $Folder 'Pictures'
     New-Item -ItemType Directory -Path $Pics -Force | Out-Null
-    foreach ($n in @('Backgrounds.lnk','Wedges.lnk','Sabbat ring.lnk','Centre.lnk')) {
+    foreach ($n in @('Backgrounds.lnk','Wedges.lnk','Sabbat ring.lnk','Centre.lnk','Ring symbols.lnk')) {
         Set-Content -LiteralPath (Join-Path $Pics $n) -Value 'pretend shortcut'
     }
-    foreach ($n in @('Settings.lnk','Update Wallpaper Now.lnk','Program folder.lnk')) {
+    foreach ($n in @('Settings.lnk','Update Wallpaper Now.lnk','Program folder.lnk','Pictures.lnk')) {
         Set-Content -LiteralPath (Join-Path $Folder $n) -Value 'pretend shortcut'
     }
     if ($WithUserFiles) {
@@ -34,39 +60,17 @@ function New-Layout {
     return $Folder
 }
 
-# --- the block under test, copied from uninstall.ps1 (1.1.1 onwards) ---
-function Invoke-Cleanup {
-    param([string]$Folder)
-    $Pics = Join-Path $Folder 'Pictures'
-    foreach ($n in @('Backgrounds.lnk', 'Wedges.lnk', 'Sabbat ring.lnk', 'Centre.lnk',
-                     'Ring symbols.lnk')) {
-        $f = Join-Path $Pics $n
-        if (Test-Path $f -PathType Leaf) { Remove-Item $f }
-    }
-    foreach ($n in @('Settings.lnk', 'Update Wallpaper Now.lnk', 'Program folder.lnk',
-                     'Pictures.lnk')) {
-        $f = Join-Path $Folder $n
-        if (Test-Path $f -PathType Leaf) { Remove-Item $f }
-    }
-    foreach ($d in @($Pics, $Folder)) {
-        if (Test-Path $d -PathType Container) {
-            $left = @(Get-ChildItem -LiteralPath $d -Force | Where-Object { $_.Name -ne 'desktop.ini' })
-            if ($left.Count -eq 0) { Remove-Item $d -Recurse -Force }
-        }
-    }
-}
-
 $fail = 0
 
 # 1. Nothing of the user's in there: the whole folder should go.
 $f1 = New-Layout -Base (Join-Path $Root 't1')
-Invoke-Cleanup -Folder $f1
+Remove-WotyDesktopFolder -Folder $f1
 if (Test-Path $f1) { Write-Host 'FAIL  1: a clean folder was left behind'; $fail++ }
 else              { Write-Host 'pass  1: clean folder removed entirely' }
 
 # 2. The user put their own things in there: those must survive, ours must go.
 $f2 = New-Layout -Base (Join-Path $Root 't2') -WithUserFiles
-Invoke-Cleanup -Folder $f2
+Remove-WotyDesktopFolder -Folder $f2
 $notes = Join-Path $f2 'my notes.txt'
 $altar = Join-Path (Join-Path (Join-Path $f2 'Pictures') 'My Favourites') 'altar.jpg'
 if      (-not (Test-Path $notes))              { Write-Host 'FAIL  2: the user note was deleted'; $fail++ }
@@ -77,7 +81,7 @@ else    { Write-Host 'pass  2: user files kept, our shortcuts removed, folder ke
 # 3. desktop.ini is Windows' own file and must not keep the folder alive.
 $f3 = New-Layout -Base (Join-Path $Root 't3')
 Set-Content -LiteralPath (Join-Path $f3 'desktop.ini') -Value '[.ShellClassInfo]'
-Invoke-Cleanup -Folder $f3
+Remove-WotyDesktopFolder -Folder $f3
 if (Test-Path $f3) { Write-Host 'FAIL  3: desktop.ini stopped the folder being removed'; $fail++ }
 else              { Write-Host 'pass  3: desktop.ini ignored, folder removed' }
 

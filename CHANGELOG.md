@@ -3,6 +3,22 @@
 Newest first. Version numbers appear in the zip name, at the top of the README, and on every
 line of `build/log.txt`, so you can always tell which copy someone is running.
 
+## 1.1.3 — 22 November 2026
+
+Windows only, and Uninstall again. Nothing about the wallpaper changed; Linux is unaffected
+apart from the version number.
+
+- **Fixed: Uninstall could leave a shortcut behind with a confusing error.** It removed its
+  shortcuts without `-Force`, so a read-only or hidden one — which a managed or synced desktop
+  can produce — would print a red error and stay where it was. It now removes them the same way
+  it removes the folder.
+- **The Windows uninstall logic is now actually tested.** It had been written, reviewed and
+  shipped without ever being run, because there is no PowerShell on the machines it was written
+  on. `uninstall.ps1` now keeps that cleanup in a function, and `tools/test_windows_uninstall.ps1`
+  runs the real function against a sandbox folder: a clean folder is removed, a folder holding
+  your own files keeps them, and `desktop.ini` alone doesn't keep an empty one alive. The test
+  drives the shipped code rather than a copy of it, so the two can't drift apart.
+
 ## 1.1.2 — 22 November 2026
 
 - **Fixed: Uninstall could delete a launcher of your own.** It cleared its applications-menu
